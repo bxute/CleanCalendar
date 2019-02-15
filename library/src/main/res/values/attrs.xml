@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Developer email: hiankit.work@gmail.com
+  ~ GitHub: https://github.com/bxute
+  -->
+
+<resources>
+    <declare-styleable name="CleanCalendarView">
+        <attr name="firstDayOfWeek" format="integer" />
+        <attr name="showMonthBar" format="boolean" />
+    </declare-styleable>
+</resources>

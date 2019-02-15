@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Developer email: hiankit.work@gmail.com
+  ~ GitHub: https://github.com/bxute
+  -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/month_name"
+    android:layout_width="match_parent"
+    android:layout_height="28dp"
+    android:gravity="center"
+    android:background="#2FDAA007"
+    android:padding="4dp"
+    android:text="January,2019"
+    android:textColor="#161414"
+    android:textSize="16sp" />
