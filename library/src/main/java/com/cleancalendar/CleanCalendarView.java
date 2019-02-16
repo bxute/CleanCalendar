@@ -17,15 +17,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 public class CleanCalendarView extends ViewGroup {
+  public static final int MIN_YEAR = 1800;
+  public static final int MAX_YEAR = 2200;
 
   private final int MONTH_VIEW_HEIGHT_DP = 36;
-  private final int TILE_HEIGHT_DP = 48;
-  private final int TILE_WIDTH_DP = 48;
+  public static final int TILE_HEIGHT_DP = 48;
   private Context mContext;
-  //Show or hide month name row
-  private boolean showMonthBar = true;
   private int visibleWeeksCount = 6;
-  private int daysInaWeek = 7;
   /*Day on which week starts
     Mon = 1, Tue = 2, Wed = 3, Thu = 4, Fri = 5, Sat = 6, Sun = 7
   */
@@ -67,7 +65,7 @@ public class CleanCalendarView extends ViewGroup {
     try {
       TypedArray a = context.getResources().obtainAttributes(attrs, R.styleable.CleanCalendarView);
       firstDayOfWeek = a.getInt(R.styleable.CleanCalendarView_firstDayOfWeek, 1);
-      showMonthBar = a.getBoolean(R.styleable.CleanCalendarView_showMonthBar, true);
+      //showMonthBar = a.getBoolean(R.styleable.CleanCalendarView_showMonthBar, true);
       a.recycle();
     }
     catch (Exception e) {

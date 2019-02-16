@@ -7,7 +7,7 @@ package com.cleancalendar;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -16,7 +16,18 @@ import static org.junit.Assert.*;
  */
 public class ExampleUnitTest {
   @Test
-  public void addition_isCorrect() {
-    assertEquals(4, 2 + 2);
+  public void testWeeksCount() {
+    int expected = 5;
+    CalendarDayModel calendarDayModel = new CalendarDayModel(2018, 2, 1);
+    int weeksCount = calendarDayModel.weeksCount();
+    assertEquals(expected, weeksCount);
+  }
+
+  @Test
+  public void testDaysCount() {
+    int expectedDay = 28;
+    CalendarDayModel calendarDayModel = new CalendarDayModel(2019, 2, 1);
+    int daysCount = calendarDayModel.daysInMonth();
+    assertEquals(expectedDay, daysCount);
   }
 }
