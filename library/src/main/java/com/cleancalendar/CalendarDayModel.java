@@ -102,8 +102,7 @@ public class CalendarDayModel {
   }
 
   public DayOfWeek dayOfWeek() {
-    TemporalField temporalField = WeekFields.of(DayOfWeek.MONDAY, 1).dayOfWeek();
-    return date.with(temporalField, DayOfWeek.SUNDAY.getValue()).getDayOfWeek();
+    return date.getDayOfWeek();
   }
 
   public int daysInMonth() {
@@ -112,7 +111,7 @@ public class CalendarDayModel {
     while (true) {
       LocalDate newDate = _date.plusDays(1);
       dayCount++;
-      if (newDate.getMonthValue() > this.date.getMonthValue()) {
+      if (newDate.getMonthValue() > this.date.getMonthValue() || newDate.getYear() > this.date.getYear()) {
         break;
       }
       _date = newDate;
@@ -121,21 +120,10 @@ public class CalendarDayModel {
   }
 
   public int weeksCount() {
-    LocalDate _date = this.date;
-    int weekCount = 1;
-    int weekDayAfterAdding;
-    while (true) {
-      LocalDate newDate = _date.plusDays(1);
-      weekDayAfterAdding = newDate.getDayOfWeek().getValue();
-      if (weekDayAfterAdding == DayOfWeek.SUNDAY.getValue()) {
-        weekCount++;
-      }
-      //break condition
-      if (newDate.getMonthValue() > this.date.getMonthValue()) {
-        break;
-      }
-      _date = newDate;
-    }
+    LocalDate firstDayOfMonth = LocalDate.of(this.date.getYear(), this.date.getMonth(), 1);
+    LocalDate lastDayOfMonth = firstDayOfMonth.plusMonths(1).minusDays(1);
+    TemporalField temporalField = WeekFields.of(DayOfWeek.MONDAY, 1).weekOfMonth();
+    int weekCount = lastDayOfMonth.get(temporalField);
     return weekCount;
   }
 }

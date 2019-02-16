@@ -6,8 +6,8 @@
 package com.cleancalendar;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +29,8 @@ public class MonthView extends ViewGroup {
   private int totalWeeksHeight;
   private int weekLabelHeightPx;
   private int singleWeekHeight;
+  private int firstWeekDay;
+  private CalendarDayModel today;
 
   public MonthView(Context context) {
     this(context, null);
@@ -51,6 +53,8 @@ public class MonthView extends ViewGroup {
   public void setMonthNumber(int monthNumber) {
     this.mMonthIndex = monthNumber;
     firstDayOfMonth = CalendarDayModel.fromMonthNumber(monthNumber);
+    today = CalendarDayModel.today();
+    firstWeekDay = firstDayOfMonth.dayOfWeek().getValue();
     totalWeeks = firstDayOfMonth.weeksCount();
     totalDays = firstDayOfMonth.daysInMonth();
     weekLabelHeightPx = inPx(DEFAULT_WEEK_LABEL_HEIGHT_DP);
@@ -82,6 +86,11 @@ public class MonthView extends ViewGroup {
       TextView view = (TextView) LayoutInflater.from(mContext).inflate(R.layout.day_view,
        null, false);
       view.setText("" + i);
+      if (i == today.getDate().getDayOfMonth()) {
+        view.setTextColor(Color.WHITE);
+      } else {
+        view.setTextColor(Color.BLACK);
+      }
       addView(view);
     }
   }
@@ -89,20 +98,44 @@ public class MonthView extends ViewGroup {
   @Override
   protected void onLayout(boolean changed, int l, int t, int r, int b) {
     int childCount = getChildCount();
+    int parentWidth = getMeasuredWidth();
     int top = t;
     int left = l;
-
-    for (int i = 1; i <= childCount; i++) {
+    int currentDayCol = 1;
+    boolean startDayLayout = false;
+    for (int i = 1; i <= childCount; ) {
       View child = getChildAt(i - 1);
       if (child.getVisibility() == View.GONE)
         continue;
       float alpha = i;
       child.setAlpha(alpha / (i + 5));
-      child.layout(left, top, left + child.getMeasuredWidth(), top + child.getMeasuredHeight());
+
+      //layout if week labels
+      if (i < 8) {
+        i++;
+        child.layout(left, top, left + child.getMeasuredWidth(), top + child.getMeasuredHeight());
+        currentDayCol++;
+      } else {
+        //layout days
+        if (startDayLayout) {
+          i++;
+          child.layout(left, top, left + child.getMeasuredWidth(), top + child.getMeasuredHeight());
+          currentDayCol++;
+        } else {
+          left += child.getMeasuredWidth();
+          currentDayCol++;
+          if (currentDayCol >= firstWeekDay) {
+            startDayLayout = true;
+          }
+          continue;
+        }
+      }
+
       left += child.getMeasuredWidth();
-      if (i > 0 && i % 7 == 0) {
+      if (currentDayCol > 7) {
         top += child.getMeasuredHeight();
         left = 0;
+        currentDayCol = 1;
       }
     }
   }
