@@ -10,13 +10,13 @@ import android.content.res.TypedArray;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.threeten.bp.LocalDate;
 import org.threeten.bp.Month;
 import org.threeten.bp.format.TextStyle;
 
@@ -29,6 +29,7 @@ public class CleanCalendarView extends ViewGroup {
   public static final int MAX_YEAR = 2200;
   public static final int TILE_HEIGHT_DP = 48;
   private final int MONTH_VIEW_HEIGHT_DP = 36;
+  private int mCurrentPage = 0;
   private Context mContext;
   private int visibleWeeksCount = 6;
   /*Day on which week starts
@@ -36,6 +37,8 @@ public class CleanCalendarView extends ViewGroup {
   */
   private int firstDayOfWeek = 1;
   private ViewPager viewPager;
+  //Adapter for providing event information.
+  private CalendarEventAdapter eventAdapter;
   private MonthViewAdapter monthViewAdapter;
   private TextView monthNameView;
   private int monthNameViewHeight;
@@ -44,6 +47,7 @@ public class CleanCalendarView extends ViewGroup {
   private ViewPager.OnPageChangeListener pageChangeListener = new ViewPager.OnPageChangeListener() {
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
     }
 
     @Override
@@ -52,6 +56,8 @@ public class CleanCalendarView extends ViewGroup {
       if (calendarListener != null) {
         calendarListener.onMonthChanged(dayModel);
       }
+      dispatchPrefetchCall(dayModel);
+      mCurrentPage = position;
       updateUi();
     }
 
@@ -88,6 +94,7 @@ public class CleanCalendarView extends ViewGroup {
     totalWeeksHeight = inPx(DEFAULT_WEEK_LABEL_HEIGHT_DP) + (6 * inPx(TILE_HEIGHT_DP));
     monthNameViewHeight = inPx(MONTH_VIEW_HEIGHT_DP);
     monthViewAdapter = new MonthViewAdapter();
+    monthViewAdapter.setEventAdapter(eventAdapter);
     View view = LayoutInflater.from(context).inflate(R.layout.calendar_top_bar,
      null, false);
     monthNameView = view.findViewById(R.id.month_name);
@@ -106,6 +113,7 @@ public class CleanCalendarView extends ViewGroup {
     viewPager.setAdapter(monthViewAdapter);
     CalendarDayModel today = CalendarDayModel.today();
     viewPager.setCurrentItem(today.monthNumber());
+    dispatchPrefetchCall(today);
     addView(monthNameView);
     addView(viewPager);
   }
@@ -114,6 +122,28 @@ public class CleanCalendarView extends ViewGroup {
     return (int) TypedValue
      .applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, mContext.getResources()
       .getDisplayMetrics());
+  }
+
+
+  private void dispatchPrefetchCall(CalendarDayModel today) {
+    if (eventAdapter != null) {
+      //current month
+      eventAdapter.preFetchEventFor(today);
+      LocalDate prevMonth = today.getDate().minusMonths(1);
+      //for prev month
+      eventAdapter.preFetchEventFor(CalendarDayModel.from(prevMonth));
+      //for next month
+      LocalDate nextMonth = today.getDate().plusMonths(1);
+      eventAdapter.preFetchEventFor(CalendarDayModel.from(nextMonth));
+    }
+  }
+
+
+  public void setEventAdapter(CalendarEventAdapter eventAdapter) {
+    this.eventAdapter = eventAdapter;
+    if (monthViewAdapter != null) {
+      monthViewAdapter.setEventAdapter(eventAdapter);
+    }
   }
 
   private void updateUi() {

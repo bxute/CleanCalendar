@@ -7,6 +7,7 @@ package com.cleancalendar;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -14,8 +15,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.threeten.bp.LocalDate;
+import org.threeten.bp.Month;
+import org.threeten.bp.format.TextStyle;
+
+import java.util.Locale;
+
 public class MonthView extends ViewGroup {
   public static final int DEFAULT_WEEK_LABEL_HEIGHT_DP = 48;
+  private static final int NO_DATE_SELECTION = -11;
   private static String[] weeks = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
   private final Context mContext;
   private CalendarDayModel firstDayOfMonth;
@@ -28,7 +36,11 @@ public class MonthView extends ViewGroup {
   private int firstWeekDay;
   private CalendarDayModel today;
   private int mMonthNum;
+  private int mSelectedDate = NO_DATE_SELECTION;
   private int fullWeeksHeight;
+  private CalendarEventAdapter mEventAdapter;
+  private View eventIndicator;
+  private Handler mHandler;
 
   public MonthView(Context context) {
     this(context, null);
@@ -41,6 +53,7 @@ public class MonthView extends ViewGroup {
   public MonthView(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     this.mContext = context;
+    mHandler = new Handler();
   }
 
   /**
@@ -52,6 +65,7 @@ public class MonthView extends ViewGroup {
     this.mMonthNum = monthNumber;
     firstDayOfMonth = CalendarDayModel.fromMonthNumber(monthNumber);
     today = CalendarDayModel.today();
+    mSelectedDate = today.getDay();
     firstWeekDay = firstDayOfMonth.dayOfWeek().getValue();
     totalWeeks = firstDayOfMonth.weeksCount();
     totalDays = firstDayOfMonth.daysInMonth();
@@ -85,7 +99,9 @@ public class MonthView extends ViewGroup {
        null, false);
       TextView date = view.findViewById(R.id.date);
       View background = view.findViewById(R.id.background_view);
+      eventIndicator = view.findViewById(R.id.event_indicator);
       date.setText(String.valueOf(i));
+      view.setTag(i);
       if (isToday(i)) {
         background.setBackgroundResource(R.drawable.today_indicator);
         date.setTextColor(Color.WHITE);
@@ -93,6 +109,15 @@ public class MonthView extends ViewGroup {
         background.setBackgroundResource(0);
         date.setTextColor(Color.BLACK);
       }
+      //set event indicator
+      showEventsIndicator(i);
+      view.setOnClickListener(new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          int date = (int) v.getTag();
+          selectNewDate(date);
+        }
+      });
       addView(view);
     }
   }
@@ -101,6 +126,43 @@ public class MonthView extends ViewGroup {
     return (firstDayOfMonth.getYear() == today.getYear()
      && firstDayOfMonth.getMonth() == today.getMonth()
      && date == today.getDay());
+  }
+
+  private void showEventsIndicator(int date) {
+    if (mEventAdapter != null) {
+      final CalendarDayModel calendarDay = CalendarDayModel.from(LocalDate.of(firstDayOfMonth.getYear(),
+       firstDayOfMonth.getMonth(),
+       date));
+      boolean hasEvent = mEventAdapter.getEventCountOn(calendarDay) > 0;
+      if (hasEvent) {
+        eventIndicator.setVisibility(VISIBLE);
+      } else {
+        eventIndicator.setVisibility(GONE);
+      }
+    }
+  }
+
+  private void selectNewDate(int date) {
+    if (mSelectedDate == date)
+      return;
+    //remove background if its not today
+    removeAllDateSelections();
+    View newSelectedView = getChildAtDate(date);
+    int background = isToday(date) ? R.drawable.today_indicator : R.drawable.other_day_selection_indicator;
+    newSelectedView.findViewById(R.id.background_view).setBackgroundResource(background);
+    mSelectedDate = date;
+  }
+
+  public void removeAllDateSelections() {
+    if (!isToday(mSelectedDate)) {
+      getChildAtDate(mSelectedDate).findViewById(R.id.background_view).setBackgroundResource(0);
+    }
+  }
+
+
+  private View getChildAtDate(int date) {
+    int index = date + 6;
+    return getChildAt(index);
   }
 
   @Override
@@ -149,6 +211,11 @@ public class MonthView extends ViewGroup {
   }
 
   @Override
+  public String toString() {
+    return String.valueOf(Month.of(firstDayOfMonth.getMonth()).getDisplayName(TextStyle.SHORT, Locale.getDefault()));
+  }
+
+  @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     int measuredHeight = totalHeight;
     int width = MeasureSpec.getSize(widthMeasureSpec);
@@ -169,5 +236,9 @@ public class MonthView extends ViewGroup {
       int childWidthSpec = MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.EXACTLY);
       view.measure(childWidthSpec, childHeighSpec);
     }
+  }
+
+  public void setEventAdapter(CalendarEventAdapter eventAdapter) {
+    this.mEventAdapter = eventAdapter;
   }
 }

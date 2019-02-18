@@ -5,22 +5,32 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:clickable="true">
 
     <View
-        android:layout_centerInParent="true"
         android:id="@+id/background_view"
         android:layout_width="36dp"
-        android:layout_height="36dp"/>
+        android:layout_height="36dp"
+        android:layout_centerInParent="true" />
 
     <TextView
         android:id="@+id/date"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:gravity="center"
         android:layout_centerInParent="true"
+        android:gravity="center"
         android:orientation="vertical"
         android:text="5"
         android:textSize="16sp" />
+
+    <View
+        android:id="@+id/event_indicator"
+        android:layout_marginTop="-8dp"
+        android:layout_width="4dp"
+        android:layout_height="4dp"
+        android:layout_below="@+id/date"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/one_dot" />
 
 </RelativeLayout>
