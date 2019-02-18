@@ -9,25 +9,27 @@ import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 public class MonthViewAdapter extends PagerAdapter {
+
+  private static final int MIN_YEAR = 1800;
+  private static final int MAX_YEAR = 2200;
 
   public MonthViewAdapter() {
   }
 
   @Override
   public int getCount() {
-    return 100;
+    return CalendarDayModel.totalMonthsInRange(MIN_YEAR, MAX_YEAR);
   }
 
   @NonNull
   @Override
   public Object instantiateItem(@NonNull ViewGroup container, int position) {
-    TextView textView = new TextView(container.getContext());
-    textView.setText(String.format("I am %d item of this view", position));
-    container.addView(textView);
-    return textView;
+    MonthView monthView = new MonthView(container.getContext());
+    monthView.setMonthNumber(position);
+    container.addView(monthView);
+    return monthView;
   }
 
   @Override

@@ -101,6 +101,14 @@ public class CalendarDayModel {
     return date;
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    CalendarDayModel otherDate = (CalendarDayModel) obj;
+    return (otherDate.date.getDayOfMonth() == this.date.getDayOfMonth()) &&
+     (otherDate.date.getYear() == this.date.getYear()) &&
+     (otherDate.date.getMonthValue() == this.date.getMonthValue());
+  }
+
   public DayOfWeek dayOfWeek() {
     return date.getDayOfWeek();
   }

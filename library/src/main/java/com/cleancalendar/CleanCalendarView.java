@@ -7,21 +7,28 @@ package com.cleancalendar;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import org.threeten.bp.Month;
+import org.threeten.bp.format.TextStyle;
+
+import java.util.Locale;
+
+import static com.cleancalendar.MonthView.DEFAULT_WEEK_LABEL_HEIGHT_DP;
 
 public class CleanCalendarView extends ViewGroup {
   public static final int MIN_YEAR = 1800;
   public static final int MAX_YEAR = 2200;
-
-  private final int MONTH_VIEW_HEIGHT_DP = 36;
   public static final int TILE_HEIGHT_DP = 48;
+  private final int MONTH_VIEW_HEIGHT_DP = 36;
   private Context mContext;
   private int visibleWeeksCount = 6;
   /*Day on which week starts
@@ -30,16 +37,22 @@ public class CleanCalendarView extends ViewGroup {
   private int firstDayOfWeek = 1;
   private ViewPager viewPager;
   private MonthViewAdapter monthViewAdapter;
-
+  private TextView monthNameView;
+  private int monthNameViewHeight;
+  private int totalWeeksHeight;
+  private CalendarListener calendarListener;
   private ViewPager.OnPageChangeListener pageChangeListener = new ViewPager.OnPageChangeListener() {
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
     }
 
     @Override
     public void onPageSelected(int position) {
-
+      CalendarDayModel dayModel = CalendarDayModel.fromMonthNumber(position);
+      if (calendarListener != null) {
+        calendarListener.onMonthChanged(dayModel);
+      }
+      updateUi();
     }
 
     @Override
@@ -47,10 +60,6 @@ public class CleanCalendarView extends ViewGroup {
 
     }
   };
-  private View monthNameView;
-  private int monthViewHeight;
-  private int totalWeeksHeight;
-
 
   public CleanCalendarView(Context context) {
     this(context, null);
@@ -76,25 +85,27 @@ public class CleanCalendarView extends ViewGroup {
 
   private void initialize(Context context) {
     this.mContext = context;
-    totalWeeksHeight = visibleWeeksCount * inPx(TILE_HEIGHT_DP);
-    monthViewHeight = inPx(MONTH_VIEW_HEIGHT_DP);
+    totalWeeksHeight = inPx(DEFAULT_WEEK_LABEL_HEIGHT_DP) + (6 * inPx(TILE_HEIGHT_DP));
+    monthNameViewHeight = inPx(MONTH_VIEW_HEIGHT_DP);
     monthViewAdapter = new MonthViewAdapter();
-    View view = LayoutInflater.from(context).inflate(R.layout.calendar_top_bar, null, false);
+    View view = LayoutInflater.from(context).inflate(R.layout.calendar_top_bar,
+     null, false);
     monthNameView = view.findViewById(R.id.month_name);
     viewPager = new ViewPager(mContext);
     viewPager.setId(R.id.pager);
-    viewPager.setBackgroundColor(Color.parseColor("#009988"));
     viewPager.setOffscreenPageLimit(1);
     viewPager.setOnPageChangeListener(pageChangeListener);
-    viewPager.setPageTransformer(false, new ViewPager.PageTransformer() {
-      @Override
-      public void transformPage(@NonNull View page, float position) {
-        position = (float) Math.sqrt(1 - Math.abs(position));
-        page.setAlpha(position);
-      }
-    });
+    viewPager.setPageTransformer(false,
+     new ViewPager.PageTransformer() {
+       @Override
+       public void transformPage(@NonNull View page, float position) {
+         position = (float) Math.sqrt(1 - Math.abs(position));
+         page.setAlpha(position);
+       }
+     });
     viewPager.setAdapter(monthViewAdapter);
-    viewPager.setCurrentItem(50);
+    CalendarDayModel today = CalendarDayModel.today();
+    viewPager.setCurrentItem(today.monthNumber());
     addView(monthNameView);
     addView(viewPager);
   }
@@ -103,6 +114,14 @@ public class CleanCalendarView extends ViewGroup {
     return (int) TypedValue
      .applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, mContext.getResources()
       .getDisplayMetrics());
+  }
+
+  private void updateUi() {
+    int monthNumber = viewPager.getCurrentItem();
+    CalendarDayModel day = CalendarDayModel.fromMonthNumber(monthNumber);
+    String year = String.valueOf(day.getYear());
+    String month = Month.of(day.getMonth()).getDisplayName(TextStyle.FULL, Locale.getDefault());
+    monthNameView.setText(String.format("%s, %s", month, year));
   }
 
   @Override
@@ -122,7 +141,7 @@ public class CleanCalendarView extends ViewGroup {
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
-    setMeasuredDimension(parentWidth, totalWeeksHeight + monthViewHeight);
+    setMeasuredDimension(parentWidth, totalWeeksHeight + monthNameViewHeight);
     int childCount = getChildCount();
     for (int i = 0; i < childCount; i++) {
       final View child = getChildAt(i);
@@ -131,7 +150,7 @@ public class CleanCalendarView extends ViewGroup {
       if (i == 0) {
         //month view
         childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(parentWidth, MeasureSpec.EXACTLY);
-        childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(monthViewHeight, MeasureSpec.EXACTLY);
+        childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(monthNameViewHeight, MeasureSpec.EXACTLY);
       } else {
         //pager
         childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(parentWidth, MeasureSpec.EXACTLY);
@@ -139,5 +158,9 @@ public class CleanCalendarView extends ViewGroup {
       }
       child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
+  }
+
+  public void setCalendarListener(CalendarListener calendarListener) {
+    this.calendarListener = calendarListener;
   }
 }

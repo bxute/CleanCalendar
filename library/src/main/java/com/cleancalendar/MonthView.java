@@ -15,22 +15,20 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 public class MonthView extends ViewGroup {
-  private final int DEFAULT_WEEKS_COUNT = 6;
-  private final int DEFAULT_WEEK_LABEL_HEIGHT_DP = 48;
+  private static String[] weeks = {"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};
+  public static final int DEFAULT_WEEK_LABEL_HEIGHT_DP = 48;
   private final Context mContext;
-  private int mMonthIndex;
   private CalendarDayModel firstDayOfMonth;
   private int totalWeeks;
   private int totalHeight;
   private int dayColumnWidth;
-  private int month;
-  private int year;
   private int totalDays;
   private int totalWeeksHeight;
   private int weekLabelHeightPx;
   private int singleWeekHeight;
   private int firstWeekDay;
   private CalendarDayModel today;
+  private int mMonthNum;
 
   public MonthView(Context context) {
     this(context, null);
@@ -51,7 +49,7 @@ public class MonthView extends ViewGroup {
    * @param monthNumber index of month
    */
   public void setMonthNumber(int monthNumber) {
-    this.mMonthIndex = monthNumber;
+    this.mMonthNum = monthNumber;
     firstDayOfMonth = CalendarDayModel.fromMonthNumber(monthNumber);
     today = CalendarDayModel.today();
     firstWeekDay = firstDayOfMonth.dayOfWeek().getValue();
@@ -76,7 +74,7 @@ public class MonthView extends ViewGroup {
     for (int i = 0; i < 7; i++) {
       TextView view = (TextView) LayoutInflater.from(mContext).inflate(R.layout.week_name_label_view,
        null, false);
-      view.setText("Pos " + i);
+      view.setText(weeks[i]);
       addView(view);
     }
   }
@@ -86,11 +84,6 @@ public class MonthView extends ViewGroup {
       TextView view = (TextView) LayoutInflater.from(mContext).inflate(R.layout.day_view,
        null, false);
       view.setText("" + i);
-      if (i == today.getDate().getDayOfMonth()) {
-        view.setTextColor(Color.WHITE);
-      } else {
-        view.setTextColor(Color.BLACK);
-      }
       addView(view);
     }
   }
@@ -98,18 +91,14 @@ public class MonthView extends ViewGroup {
   @Override
   protected void onLayout(boolean changed, int l, int t, int r, int b) {
     int childCount = getChildCount();
-    int parentWidth = getMeasuredWidth();
-    int top = t;
-    int left = l;
+    int top = 0;
+    int left = 0;
     int currentDayCol = 1;
     boolean startDayLayout = false;
     for (int i = 1; i <= childCount; ) {
       View child = getChildAt(i - 1);
       if (child.getVisibility() == View.GONE)
         continue;
-      float alpha = i;
-      child.setAlpha(alpha / (i + 5));
-
       //layout if week labels
       if (i < 8) {
         i++;
