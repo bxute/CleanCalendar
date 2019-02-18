@@ -18,6 +18,7 @@ public class MonthViewAdapter extends PagerAdapter {
   private static final int MAX_YEAR = 2200;
   private ArrayDeque<MonthView> monthViewsDequeable;
   private CalendarEventAdapter mEventAdapter;
+  private CalendarListener mCalendarListener;
 
   public MonthViewAdapter() {
     monthViewsDequeable = new ArrayDeque<>();
@@ -33,6 +34,7 @@ public class MonthViewAdapter extends PagerAdapter {
   public Object instantiateItem(@NonNull ViewGroup container, int position) {
     MonthView monthView = new MonthView(container.getContext());
     monthView.setEventAdapter(mEventAdapter);
+    monthView.setCalendarListener(mCalendarListener);
     monthView.setMonthNumber(position);
     container.addView(monthView);
     monthViewsDequeable.add(monthView);
@@ -55,11 +57,15 @@ public class MonthViewAdapter extends PagerAdapter {
   private void invalidateChilds() {
     Iterator<MonthView> iterators = monthViewsDequeable.iterator();
     while (iterators.hasNext()) {
-      iterators.next().removeAllDateSelections();
+      iterators.next().resetSelections();
     }
   }
 
   public void setEventAdapter(CalendarEventAdapter eventAdapter) {
     this.mEventAdapter = eventAdapter;
+  }
+
+  public void setCalendarListener(CalendarListener calendarListener) {
+    this.mCalendarListener = calendarListener;
   }
 }

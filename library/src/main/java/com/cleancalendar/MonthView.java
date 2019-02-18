@@ -22,7 +22,7 @@ import org.threeten.bp.format.TextStyle;
 import java.util.Locale;
 
 public class MonthView extends ViewGroup {
-  public static final int DEFAULT_WEEK_LABEL_HEIGHT_DP = 48;
+  public static final int DEFAULT_WEEK_LABEL_HEIGHT_DP = 36;
   private static final int NO_DATE_SELECTION = -11;
   private static String[] weeks = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
   private final Context mContext;
@@ -41,6 +41,7 @@ public class MonthView extends ViewGroup {
   private CalendarEventAdapter mEventAdapter;
   private View eventIndicator;
   private Handler mHandler;
+  private CalendarListener mCalendarListener;
 
   public MonthView(Context context) {
     this(context, null);
@@ -146,23 +147,37 @@ public class MonthView extends ViewGroup {
     if (mSelectedDate == date)
       return;
     //remove background if its not today
-    removeAllDateSelections();
+    resetSelections();
     View newSelectedView = getChildAtDate(date);
     int background = isToday(date) ? R.drawable.today_indicator : R.drawable.other_day_selection_indicator;
-    newSelectedView.findViewById(R.id.background_view).setBackgroundResource(background);
+    newSelectedView
+     .findViewById(R.id.background_view)
+     .setBackgroundResource(background);
     mSelectedDate = date;
+    dispatchDateSelectionEvent();
   }
 
-  public void removeAllDateSelections() {
+  public void resetSelections() {
     if (!isToday(mSelectedDate)) {
-      getChildAtDate(mSelectedDate).findViewById(R.id.background_view).setBackgroundResource(0);
+      getChildAtDate(mSelectedDate)
+       .findViewById(R.id.background_view)
+       .setBackgroundResource(0);
     }
   }
-
 
   private View getChildAtDate(int date) {
     int index = date + 6;
     return getChildAt(index);
+  }
+
+  private void dispatchDateSelectionEvent() {
+    if (mCalendarListener != null) {
+      mCalendarListener.onDateSelected(CalendarDayModel.from(LocalDate.of(
+       firstDayOfMonth.getYear(),
+       firstDayOfMonth.getMonth(),
+       mSelectedDate
+      )));
+    }
   }
 
   @Override
@@ -240,5 +255,9 @@ public class MonthView extends ViewGroup {
 
   public void setEventAdapter(CalendarEventAdapter eventAdapter) {
     this.mEventAdapter = eventAdapter;
+  }
+
+  public void setCalendarListener(CalendarListener mCalendarListener) {
+    this.mCalendarListener = mCalendarListener;
   }
 }

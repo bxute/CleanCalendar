@@ -27,7 +27,7 @@ import static com.cleancalendar.MonthView.DEFAULT_WEEK_LABEL_HEIGHT_DP;
 public class CleanCalendarView extends ViewGroup {
   public static final int MIN_YEAR = 1800;
   public static final int MAX_YEAR = 2200;
-  public static final int TILE_HEIGHT_DP = 48;
+  public static final int TILE_HEIGHT_DP = 38;
   private final int MONTH_VIEW_HEIGHT_DP = 36;
   private int mCurrentPage = 0;
   private Context mContext;
@@ -53,9 +53,7 @@ public class CleanCalendarView extends ViewGroup {
     @Override
     public void onPageSelected(int position) {
       CalendarDayModel dayModel = CalendarDayModel.fromMonthNumber(position);
-      if (calendarListener != null) {
-        calendarListener.onMonthChanged(dayModel);
-      }
+      dispatchMonthChangedCall(dayModel);
       dispatchPrefetchCall(dayModel);
       mCurrentPage = position;
       updateUi();
@@ -116,6 +114,7 @@ public class CleanCalendarView extends ViewGroup {
     dispatchPrefetchCall(today);
     addView(monthNameView);
     addView(viewPager);
+    dispatchMonthChangedCall(today);
   }
 
   private int inPx(int dp) {
@@ -123,7 +122,6 @@ public class CleanCalendarView extends ViewGroup {
      .applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, mContext.getResources()
       .getDisplayMetrics());
   }
-
 
   private void dispatchPrefetchCall(CalendarDayModel today) {
     if (eventAdapter != null) {
@@ -138,6 +136,11 @@ public class CleanCalendarView extends ViewGroup {
     }
   }
 
+  private void dispatchMonthChangedCall(CalendarDayModel dayModel) {
+    if (calendarListener != null) {
+      calendarListener.onMonthChanged(dayModel);
+    }
+  }
 
   public void setEventAdapter(CalendarEventAdapter eventAdapter) {
     this.eventAdapter = eventAdapter;
@@ -192,5 +195,8 @@ public class CleanCalendarView extends ViewGroup {
 
   public void setCalendarListener(CalendarListener calendarListener) {
     this.calendarListener = calendarListener;
+    if (monthViewAdapter != null) {
+      monthViewAdapter.setCalendarListener(calendarListener);
+    }
   }
 }

@@ -6,9 +6,10 @@ import android.util.Log;
 
 import com.cleancalendar.CalendarDayModel;
 import com.cleancalendar.CalendarEventAdapter;
+import com.cleancalendar.CalendarListener;
 import com.cleancalendar.CleanCalendarView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements CalendarListener {
   CleanCalendarView calendarView;
 
   @Override
@@ -16,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     calendarView = findViewById(R.id.view);
+    calendarView.setCalendarListener(this);
     calendarView.setEventAdapter(new CalendarEventAdapter() {
       @Override
       public int getEventCountOn(CalendarDayModel day) {
@@ -24,8 +26,18 @@ public class MainActivity extends AppCompatActivity {
 
       @Override
       public void preFetchEventFor(CalendarDayModel day) {
-        Log.d("MainPage", "prefetch for " + day.getMonth());
+
       }
     });
+  }
+
+  @Override
+  public void onMonthChanged(CalendarDayModel dayModel) {
+    Log.d("MainPage", "month changed " + dayModel.getMonth());
+  }
+
+  @Override
+  public void onDateSelected(CalendarDayModel day) {
+    Log.d("MainPage", "date Selected " + day.getDay());
   }
 }
