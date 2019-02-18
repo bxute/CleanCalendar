@@ -15,20 +15,20 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 public class MonthView extends ViewGroup {
-  private static String[] weeks = {"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};
   public static final int DEFAULT_WEEK_LABEL_HEIGHT_DP = 48;
+  private static String[] weeks = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
   private final Context mContext;
   private CalendarDayModel firstDayOfMonth;
   private int totalWeeks;
   private int totalHeight;
   private int dayColumnWidth;
   private int totalDays;
-  private int totalWeeksHeight;
   private int weekLabelHeightPx;
   private int singleWeekHeight;
   private int firstWeekDay;
   private CalendarDayModel today;
   private int mMonthNum;
+  private int fullWeeksHeight;
 
   public MonthView(Context context) {
     this(context, null);
@@ -56,9 +56,9 @@ public class MonthView extends ViewGroup {
     totalWeeks = firstDayOfMonth.weeksCount();
     totalDays = firstDayOfMonth.daysInMonth();
     weekLabelHeightPx = inPx(DEFAULT_WEEK_LABEL_HEIGHT_DP);
-    totalWeeksHeight = (6 * inPx(CleanCalendarView.TILE_HEIGHT_DP));
-    singleWeekHeight = totalWeeksHeight / totalWeeks;
-    totalHeight = totalWeeksHeight + weekLabelHeightPx;
+    fullWeeksHeight = 6 * inPx(CleanCalendarView.TILE_HEIGHT_DP);
+    singleWeekHeight = fullWeeksHeight / totalWeeks;
+    totalHeight = fullWeeksHeight + weekLabelHeightPx;
     addWeekDays();
     addDayViews();
     requestLayout();
@@ -81,11 +81,26 @@ public class MonthView extends ViewGroup {
 
   private void addDayViews() {
     for (int i = 1; i <= totalDays; i++) {
-      TextView view = (TextView) LayoutInflater.from(mContext).inflate(R.layout.day_view,
+      View view = LayoutInflater.from(mContext).inflate(R.layout.day_view,
        null, false);
-      view.setText("" + i);
+      TextView date = view.findViewById(R.id.date);
+      View background = view.findViewById(R.id.background_view);
+      date.setText(String.valueOf(i));
+      if (isToday(i)) {
+        background.setBackgroundResource(R.drawable.today_indicator);
+        date.setTextColor(Color.WHITE);
+      } else {
+        background.setBackgroundResource(0);
+        date.setTextColor(Color.BLACK);
+      }
       addView(view);
     }
+  }
+
+  private boolean isToday(int date) {
+    return (firstDayOfMonth.getYear() == today.getYear()
+     && firstDayOfMonth.getMonth() == today.getMonth()
+     && date == today.getDay());
   }
 
   @Override
@@ -108,7 +123,11 @@ public class MonthView extends ViewGroup {
         //layout days
         if (startDayLayout) {
           i++;
-          child.layout(left, top, left + child.getMeasuredWidth(), top + child.getMeasuredHeight());
+          child.layout(left,
+           top,
+           left + child.getMeasuredWidth(),
+           top + child.getMeasuredHeight());
+
           currentDayCol++;
         } else {
           left += child.getMeasuredWidth();
