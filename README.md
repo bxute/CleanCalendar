@@ -108,12 +108,13 @@ calendarView.setCalendarListener(new CalendarListener() {
 calendarView.setEventAdapter(new CalendarEventAdapter() {
       @Override
       public int getEventCountOn(CalendarDayModel day) {
+      //return the number of even on this particular day
         return day.getDay() % 3 == 0 ? 1 : 0;
       }
 
       @Override
       public void preFetchEventFor(CalendarDayModel day) {
-
+		// prepare your events for the given month.
       }
     });
     
