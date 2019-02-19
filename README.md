@@ -23,19 +23,18 @@
 
 ```
 allprojects {
-		repositories {
-			...
-			maven { url 'https://jitpack.io' }
-		}
+  repositories {
+    maven { url 'https://jitpack.io' }
 	}
+}
 ```
 
 **2. Add the dependency**
 
 ```
-	dependencies {
-	        implementation 'com.github.bxute:CleanCalendar:{latest_version}'
-	}
+dependencies {
+  implementation 'com.github.bxute:CleanCalendar:{latest_version}'
+}
 ```
 
 **3. Add XML to your layout**
