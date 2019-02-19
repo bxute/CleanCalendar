@@ -1,3 +1,4 @@
+[![](https://jitpack.io/v/bxute/CleanCalendar.svg)](https://jitpack.io/#bxute/CleanCalendar)
 # CleanCalendar
 
 ## A lightweight Android library for calendar.
