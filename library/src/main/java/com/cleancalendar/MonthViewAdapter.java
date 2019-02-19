@@ -57,7 +57,7 @@ public class MonthViewAdapter extends PagerAdapter {
   private void invalidateChilds() {
     Iterator<MonthView> iterators = monthViewsDequeable.iterator();
     while (iterators.hasNext()) {
-      iterators.next().resetSelections();
+      iterators.next().setDefaultDate();
     }
   }
 
