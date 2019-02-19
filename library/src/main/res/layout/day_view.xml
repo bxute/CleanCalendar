@@ -23,7 +23,7 @@
         android:textColor="@color/date_color"
         android:orientation="vertical"
         android:text="5"
-        android:textSize="16sp" />
+        android:textSize="14sp" />
 
     <View
         android:id="@+id/event_indicator"

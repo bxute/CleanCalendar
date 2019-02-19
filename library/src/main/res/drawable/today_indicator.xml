@@ -8,5 +8,5 @@
     <size
         android:width="10dp"
         android:height="10dp" />
-    <solid android:color="#2196F3" />
+    <solid android:color="@color/sky_blue" />
 </shape>

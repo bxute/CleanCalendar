@@ -19,6 +19,8 @@ public class MonthViewAdapter extends PagerAdapter {
   private ArrayDeque<MonthView> monthViewsDequeable;
   private CalendarEventAdapter mEventAdapter;
   private CalendarListener mCalendarListener;
+  private float mCellSize;
+  private CalendarConfig mCalendarConfig;
 
   public MonthViewAdapter() {
     monthViewsDequeable = new ArrayDeque<>();
@@ -33,6 +35,7 @@ public class MonthViewAdapter extends PagerAdapter {
   @Override
   public Object instantiateItem(@NonNull ViewGroup container, int position) {
     MonthView monthView = new MonthView(container.getContext());
+    monthView.setCalendarConfig(mCalendarConfig);
     monthView.setEventAdapter(mEventAdapter);
     monthView.setCalendarListener(mCalendarListener);
     monthView.setMonthNumber(position);
@@ -67,5 +70,13 @@ public class MonthViewAdapter extends PagerAdapter {
 
   public void setCalendarListener(CalendarListener calendarListener) {
     this.mCalendarListener = calendarListener;
+  }
+
+  public void setCellSize(float cellDimension) {
+    this.mCellSize = cellDimension;
+  }
+
+  public void setCalendarCellConfig(CalendarConfig calendarConfig) {
+    this.mCalendarConfig = calendarConfig;
   }
 }

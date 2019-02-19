@@ -6,4 +6,6 @@
 
 <resources>
     <color name="date_color">#F2222222</color>
+    <color name="sky_blue">#2196F3</color>
+    <color name="selected_date_outline_color">#75C0C0C0</color>
 </resources>

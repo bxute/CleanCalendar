@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements CalendarListener 
 
       }
     });
+    calendarView.jumpToDate(CalendarDayModel.today());
   }
 
   @Override
